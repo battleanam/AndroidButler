@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hanayue.service.user.dao.AccountDao">
+
+    <resultMap id="accountResult" type="com.hanayue.service.user.model.Account">
+        <id property="id" column="id"/>
+        <result property="account" column="account"/>
+        <result property="username" column="username"/>
+        <result property="profileId" column="profile_id"/>
+        <association property="profile" column="profile_id" select="selectOnesProfile"/>
+    </resultMap>
+
+    <resultMap id="profileResult" type="com.hanayue.service.user.model.Profile">
+        <id property="id" column="id"/>
+        <result property="picture" column="picture"/>
+        <result property="sex" column="sex"/>
+        <result property="birthday" column="birthday"/>
+        <result property="occupation" column="occupation"/>
+        <result property="company" column="company"/>
+        <result property="school" column="school"/>
+        <result property="location" column="location"/>
+        <result property="email" column="email"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <select id="doLogin" parameterType="java.util.Map" resultMap="accountResult">
+        select *
+        from base_account a
+        where 1=1
+        <if test="null != account">and a.account = #{account}</if>
+        <if test="null != password">and a.password = #{password}</if>
+    </select>
+
+    <select id="selectOneByParam" parameterType="java.util.Map" resultMap="accountResult">
+        select *
+        from account a
+        where 1=1
+        <if test="null != id">and a.id = #{id}</if>
+        <if test="null != account">and a.account = #{account}</if>
+        <if test="null != username">and a.username = #{username}</if>
+    </select>
+
+    <select id="selectListByParam" parameterType="java.util.Map" resultMap="accountResult">
+        select *
+        from account a
+        where 1=1
+        <if test="null != id">and a.id = #{id}</if>
+        <if test="null != account">and a.account = #{account}</if>
+        <if test="null != username">and a.username = #{username}</if>
+    </select>
+
+    <select id="selectOnesProfile" resultMap="profileResult">
+        select *
+        from profile
+        where id = #{id}
+    </select>
+
+    <insert id="insertOne" parameterType="java.util.Map">
+        <selectKey keyProperty="id" order="BEFORE" resultType="java.lang.String">
+            select UUID()
+        </selectKey>
+        insert into base_account(id,account,username,password,profile_id,deleted)
+        values
+        (#{id},#{account},#{username},#{password},#{id}, 0)
+    </insert>
+
+    <update id="update" parameterType="java.util.Map">
+        update base_account
+        <set>
+            <if test="null != username">username = #{username}</if>
+            <if test="null != password">password = #{password}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="updateProfile" parameterType="java.util.Map">
+        update profile
+        <set>
+            <if test="null != picture">picture = #{picture}</if>
+            <if test="null != sex">sex = #{sex}</if>
+            <if test="null != birthday">birthday = #{birthday}</if>
+            <if test="null != occupation">occupation = #{occupation}</if>
+            <if test="null != company">company = #{company}</if>
+            <if test="null != school">school = #{school}</if>
+            <if test="null != location">location = #{location}</if>
+            <if test="null != email">email = #{email}</if>
+            <if test="null != remark">remark = #{remark}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.String">
+        delete from base_account where id = #{id}
+    </delete>
+
+    <select id="count">
+        select count(1) from account
+    </select>
+
+    <select id="countByParam" parameterType="java.util.Map" resultType="Integer">
+        select count(1) from account a
+        where 1=1
+        <if test="null != id">and a.id = #{id}</if>
+        <if test="null != account">and a.account = #{account}</if>
+        <if test="null != username">and a.username = #{username}</if>
+    </select>
+
+    <!--<select id="selectMaxAccount"></select>-->
+
+</mapper>
