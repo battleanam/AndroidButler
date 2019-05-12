@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hanayue.service.amount.dao.AmountDao">
+    <select id="selectOneByParam" parameterType="java.util.Map" resultType="com.hanayue.service.amount.model.Amount">
+        select *
+        from amount a
+        where 1=1
+        <if test="null != id">and a.id = #{id}</if>
+        <if test="null != type">and a.type = #{type}</if>
+        <if test="null != userId">and a.user_id = #{userId}</if>
+        <if test="null != sourceType">and a.source_type = #{sourceType}</if>
+        <if test="null != moneyType">and a.money_type = #{moneyType}</if>
+        <if test="null != minCount and null != maxCount">and a.count BETWEEN #{minCount} and #{maxCount}</if>
+        <if test="null != startTime and null != endTime">and a.count BETWEEN #{startTime} and #{endTime}</if>
+    </select>
+
+    <select id="selectListByParam" parameterType="java.util.Map" resultType="com.hanayue.service.amount.model.Amount">
+        select *
+        from amount a
+        where 1=1
+        <if test="null != id">and a.id = #{id}</if>
+        <if test="null != type">and a.type = #{type}</if>
+        <if test="null != userId">and a.user_id = #{userId}</if>
+        <if test="null != sourceType">and a.source_type = #{sourceType}</if>
+        <if test="null != moneyType">and a.money_type = #{moneyType}</if>
+        <if test="null != minCount and null != maxCount">and a.count BETWEEN #{minCount} and #{maxCount}</if>
+        <if test="null != startTime and null != endTime">and a.count BETWEEN #{startTime} and #{endTime}</if>
+        order by a.note_time desc
+    </select>
+
+    <select id="count">
+        select count(1)
+        from amount a
+    </select>
+    <select id="countByParam" parameterType="java.util.Map">
+        select count(1)
+        from amount a
+        where 1=1
+        <if test="null != id">and a.id = #{id}</if>
+        <if test="null != type">and a.type = #{type}</if>
+        <if test="null != userId">and a.user_id = #{userId}</if>
+        <if test="null != sourceType">and a.source_type = #{sourceType}</if>
+        <if test="null != moneyType">and a.money_type = #{moneyType}</if>
+        <if test="null != minCount and null != maxCount">and a.count BETWEEN #{minCount} and #{maxCount}</if>
+        <if test="null != startTime and null != endTime">and a.count BETWEEN #{startTime} and #{endTime}</if>
+        order by a.note_time desc
+    </select>
+
+    <insert id="insertOne" parameterType="java.util.Map">
+        <selectKey keyProperty="id" order="BEFORE" resultType="java.lang.String">
+            select UUID()
+        </selectKey>
+        insert into amount(id,user_id,count,note_time,type,source_type,money_type,remark)
+        values
+        (#{id},#{userId},#{count},#{noteTime},#{type},#{sourceType}, #{moneyType}, #{remark})
+    </insert>
+
+    <update id="update" parameterType="java.util.Map">
+        update amount
+        <set>
+            <if test="null != count">count = #{count}</if>
+            <if test="null != noteTime">note_time = #{noteTime}</if>
+            <if test="null != type">type = #{type}</if>
+            <if test="null != sourceType">source_type = #{sourceType}</if>
+            <if test="null != moneyType">money_type = #{moneyType}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.String">
+        delete from amount where id = #{id}
+    </delete>
+</mapper>

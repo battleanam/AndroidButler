@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hanayue.service.note.dao.NoteDao">
+
+    <select id="selectOneByParam" parameterType="java.util.Map" resultType="com.hanayue.service.note.model.Note">
+        select *
+        from note a
+        where 1=1
+        <if test="null != userId">and a.user_id = #{userId}</if>
+        <if test="null != noteId">and a.note_id = #{noteId}</if>
+    </select>
+
+    <select id="selectListByParam" parameterType="java.util.Map" resultType="java.util.Map">
+        select a.note_id as id, a.user_id as userId, a.title as title, a.content as content, a.note_time as noteTime, a.create_time as createTime
+        from note a
+        where 1=1
+        <if test="null != id">and a.id = #{id}</if>
+        <if test="null != userId">and a.user_id = #{userId}</if>
+        <if test="null != noteId">and a.note_id = #{noteId}</if>
+        order by a.create_time desc
+    </select>
+
+    <insert id="insertOne" parameterType="com.hanayue.service.note.model.Note">
+        <selectKey keyProperty="id" order="BEFORE" resultType="java.lang.String">
+            select UUID()
+        </selectKey>
+        insert into note(id, user_id, note_id, title, content, create_time, note_time)
+        values
+        (#{id}, #{userId}, #{noteId}, #{title}, #{content}, #{createTime}, #{noteTime})
+    </insert>
+
+    <update id="update" parameterType="java.util.Map">
+        update note
+        <set>
+            <if test="null != title">title = #{title},</if>
+            <if test="null != content">content = #{content},</if>
+            <if test="null != create_time">create_time = #{createTime},</if>
+            <if test="null != note_time">note_time = #{noteTime}</if>
+        </set>
+        where user_id = #{userId} and note_id = #{noteId}
+    </update>
+
+    <delete id="delete" parameterType="java.util.Map">
+        delete
+        from note
+        where id = #{id}
+    </delete>
+
+    <select id="countByParam" parameterType="java.util.Map" resultType="integer">
+        select count(1)
+        from note a
+        where 1=1
+        <if test="null != userId">and a.user_id = #{userId}</if>
+        <if test="null != noteId">and a.note_id = #{noteId}</if>
+    </select>
+
+</mapper>

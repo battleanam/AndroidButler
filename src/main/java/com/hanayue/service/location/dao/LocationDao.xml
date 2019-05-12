@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hanayue.service.location.dao.LocationDao">
+
+    <select id="selectOneByParam" parameterType="java.util.Map" resultType="com.hanayue.service.location.model.City">
+        select *
+        from city a
+        where 1=1
+        <if test="null != id">and a.id = #{id}</if>
+        <if test="null != name">and a.name = #{name}</if>
+        <if test="null != pid">and a.pid = #{pid}</if>
+        <if test="null != isLeaf">and a.is_leaf = #{isLeaf}</if>
+    </select>
+
+    <select id="selectListByParam" parameterType="java.util.Map" resultType="com.hanayue.service.location.model.City">
+        select *
+        from city a
+        where 1=1
+        <if test="null != id">and a.id = #{id}</if>
+        <if test="null != name">and a.name = #{name}</if>
+        <if test="null != pid">and a.pid = #{pid}</if>
+        <if test="null != isLeaf">and a.is_leaf = #{isLeaf}</if>
+        order by a.id asc
+    </select>
+
+    <select id="count">
+        select count(1)
+        from city a
+    </select>
+    <select id="countByParam" parameterType="java.util.Map">
+        select count(1)
+        from city a
+        where 1=1
+        <if test="null != id">and a.id = #{id}</if>
+        <if test="null != name">and a.name = #{name}</if>
+        <if test="null != pid">and a.pid = #{pid}</if>
+        <if test="null != isLeaf">and a.is_leaf = #{isLeaf}</if>
+    </select>
+
+    <insert id="insertOne" parameterType="com.hanayue.service.location.model.City">
+        insert into city(id, name, pid, is_leaf, value)
+        values
+            (#{id}, #{name}, #{pid}, #{isLeaf}, #{value})
+    </insert>
+
+</mapper>

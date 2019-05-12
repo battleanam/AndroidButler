@@ -16,24 +16,6 @@ import java.io.IOException;
 @RestController
 public class MessageController {
 
-    @Resource
-    private MessageService messageService;
 
-    @RequestMapping("sendMessage")
-    public ResMessage sendMessage(@RequestBody JSONObject template) {
-        Call call = messageService.sendCode(template);
-        try {
-            Response response = call.execute();
-            assert response.body() != null;
-            JSONObject res = JSON.parseObject(response.body().string());
-            if (res.getString("statusCode").equals("000000")) {
-                return ResMessage.getSuccessMessage("发送成功", null);
-            }else {
-                return ResMessage.getNullMessage("发送失败", null);
-            }
-        } catch (IOException e) {
-            return ResMessage.getErrorMessage();
-        }
-    }
 
 }

@@ -1,20 +1,26 @@
 package com.hanayue.service.location.service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.csvreader.CsvReader;
+import com.hanayue.service.location.dao.LocationDao;
+import com.hanayue.service.location.model.City;
+
 import org.springframework.stereotype.Service;
 
+
+import javax.annotation.Resource;
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.lang.Integer.parseInt;
 
 @Service
 public class LocationService {
+
+    @Resource
+    private LocationDao locationDao;
 
     /**
      * 数据源文件的路径
@@ -22,7 +28,16 @@ public class LocationService {
     private final String csvPath = "src/main/resources/static/csv/location.csv";
 
     /**
-     * 通过地址的编码获取经纬度
+     * 通过参数查询列表
+     * @param param 查询条件
+     * @return 城市列表
+     */
+    public List<City> selectListByParam(Map param){
+        return locationDao.selectListByParam(param);
+    }
+
+    /**
+     * 通过CSV通过地址的编码获取经纬度
      * 彩云天气提供了一个各城市经纬度的对照表  是一个csv文件
      * 通过解析csv查找各地市的经纬度
      *
@@ -95,8 +110,8 @@ public class LocationService {
 
         String[] item = source.get(source.size() / 2); //按照思路  首先将中间的元素取出来
         if (item[0].equals(code)) { //然后判断中间的元素是不是我们要找的 如果是
-            String lat = item[4].substring(0, item[4].indexOf('.') + 5); //取出经度
-            String lon = item[5].substring(0, item[5].indexOf('.') + 5); //取出纬度
+            String lat = String.format("%.4f", Float.parseFloat(item[4])); //经度
+            String lon = String.format("%.4f", Float.parseFloat(item[5])); //纬度
             return lon + ',' + lat; //拼接成应该返回的形式
         } else if (parseInt(item[0]) < parseInt(code)) { //如果比较之后中间的元素偏小  说明要找的在右边
             List<String[]> newSource = source.subList(source.size() / 2, source.size()); //将右边的数组截取出来  从数组长度的一半 一直到数组最后一位
@@ -115,17 +130,11 @@ public class LocationService {
         return new File(csvPath).exists();
     }
 
-    public void transformToJSON(List<String[]> source) {
+    /**
+     * 将CSV中的数据导入数据库
+     */
+    public String transformToJSON(List<String[]> source) {
 
-
-        File file = new File("src/main/resources/static/csv/cities.json");
-        if (!file.exists()) {
-            try {
-                System.out.println(file.createNewFile());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
         List<Object> list = new ArrayList<>();
         Map<String, Object> json = new LinkedHashMap<>();
         for (int i = 0; i < source.size(); i++) {
@@ -154,13 +163,57 @@ public class LocationService {
                 }
             }
         }
-        System.out.println(new JSONObject(json));
-//        try {
-//            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-//            bw.write(json.toString());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        Object[] ps = json.keySet().toArray();
+        int id = 1;
+        int firstId = id;
+        int secondId = id;
+        boolean res = true;
+        for (int i = 0; i < ps.length; i++) {
+            City province = new City();
+            province.setId(id++);
+            province.setName(String.valueOf(ps[i]));
+            province.setPid(-1);
+            province.setIsLeaf(0);
+            JSONObject pJson = JSONObject.parseObject(JSON.toJSONString(province));
+            int pr = locationDao.insertOne(pJson);
+            res = res && pr > 0;
+            firstId = province.getId();
+            Map cities = (Map) json.get(province.getName());
+            Object[] cs = cities.keySet().toArray();
+            for (int j = 0; j < cs.length; j++) {
+                City city = new City();
+                city.setId(id++);
+                city.setName(String.valueOf(cs[j]));
+                city.setPid(firstId);
+                Map areas = (Map) cities.get(city.getName());
+                if (areas.keySet().contains("无")) {
+                    city.setIsLeaf(1);
+                    String code = (String) areas.get("无");
+                    city.setValue(getLocation(code));
+                    int cr = locationDao.insertOne(JSONObject.parseObject(JSON.toJSONString(city)));
+                    res = res && cr > 0;
+                } else {
+                    city.setIsLeaf(0);
+                    int cr = locationDao.insertOne(JSONObject.parseObject(JSON.toJSONString(city)));
+                    res = res && cr > 0;
+                    secondId = city.getId();
+                    Object[] as = areas.keySet().toArray();
+                    System.out.println("areas" + areas);
+                    for (int k = 0; k < as.length; k++) {
+                        City area = new City();
+                        area.setId(id++);
+                        area.setPid(secondId);
+                        area.setName(String.valueOf(as[k]));
+                        area.setIsLeaf(1);
+                        String code = (String) areas.get(area.getName());
+                        area.setValue(getLocation(code));
+                        int ar = locationDao.insertOne(JSONObject.parseObject(JSON.toJSONString(area)));
+                        res = res && ar > 0;
+                    }
+                }
+            }
+        }
+        return res ? "success" : "failed";
     }
 
 }

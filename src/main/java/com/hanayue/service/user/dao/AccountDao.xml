@@ -69,8 +69,8 @@
     <update id="update" parameterType="java.util.Map">
         update base_account
         <set>
-            <if test="null != username">username = #{username}</if>
-            <if test="null != password">password = #{password}</if>
+            <if test="null != username">username = #{username},</if>
+            <if test="null != password">password = #{password},</if>
         </set>
         where id = #{id}
     </update>
@@ -78,14 +78,14 @@
     <update id="updateProfile" parameterType="java.util.Map">
         update profile
         <set>
-            <if test="null != picture">picture = #{picture}</if>
-            <if test="null != sex">sex = #{sex}</if>
-            <if test="null != birthday">birthday = #{birthday}</if>
-            <if test="null != occupation">occupation = #{occupation}</if>
-            <if test="null != company">company = #{company}</if>
-            <if test="null != school">school = #{school}</if>
-            <if test="null != location">location = #{location}</if>
-            <if test="null != email">email = #{email}</if>
+            <if test="null != picture">picture = #{picture},</if>
+            <if test="null != sex">sex = #{sex},</if>
+            <if test="null != birthday">birthday = #{birthday},</if>
+            <if test="null != occupation">occupation = #{occupation},</if>
+            <if test="null != company">company = #{company},</if>
+            <if test="null != school">school = #{school},</if>
+            <if test="null != location">location = #{location},</if>
+            <if test="null != email">email = #{email},</if>
             <if test="null != remark">remark = #{remark}</if>
         </set>
         where id = #{id}
